@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+:root{
+    --accent-color: #00c3ff;
+    --base-color: #ffffff;
+    --text-color: #2E2B41;
+    --input-color: #ffffff;
+} /*Bruker :root for å definere variabler som kan brukes i hele CSS filen*/
+*{
+    margin: 0;
+    padding: 0;
+}
+html {
+    font-family: 'Poppins', 'Segoe UI', sans-serif;
+    font-size: 12pt;
+    color: var(--text-color);
+    text-align: center;
+}
+
+body {
+    min-height: 100vh;
+    background-image: url(images/pexels-hngstrm-1939485.jpg);
+    background-size: cover;
+    background-position: right;
+    overflow: hidden;
+}
+
+/* Add margin to create space between form elements */
+form div {
+    margin-bottom: 10px; /* Add more space between form sections */
+}
+
+form input{
+    box-sizing: border-box; /*Gjør at padding ikke vil endre hele "Form input" */
+    flex-grow: 1;
+    min-width: 0;
+    height: 50px;
+    padding: 1em;
+    font: inherit;
+    border-radius: 10px;
+    border: 2px solid var(--accent-color);
+    background-color: var(--input-color);
+    margin: 2px 0; /* Add 2px spacing top and bottom */
+}
+
+.username, .password, .submit {
+    margin-bottom: 8px; /* Add spacing between form sections */
+}
+
+form input:hover{
+    border-color: var(--accent-color); /*Bytter fargen rundt border på input boksene*/
+}
+
+form input:focus{ /*Fjerner en stygg svart ring rundt border og endrer den til --accent-color i stedet for*/
+    outline: none;
+    border-color: var(--text-color);
+}
+
+div:has(input:focus) > label{ /*Endrer fargen på @ siden input boksen er i fokus*/
+    background-color: var(--text-color);
+}
+
+form input::placeholder{
+  color: var(--text-color);
+}
+
+form button{
+    margin-top: 10px;
+    border: none;
+    border-radius: 1000px;
+    padding: .85em 4em;
+    background-color: var(--accent-color);
+    color: var(--base-color);
+    font: inherit;
+    font-weight: 600;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: 150ms ease;
+}
+
+form button:hover{
+    background-color: var(--text-color);
+}
+
+form button:focus{
+    outline: none;
+    background-color: var(--text-color);
+  }
