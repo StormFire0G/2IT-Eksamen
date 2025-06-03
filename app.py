@@ -7,8 +7,8 @@ from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationE
 from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mariadb+pymysql://prøveeksamen:ElvebakkenIM@127.0.0.1/prøve_eksamen2'
-app.config['SECRET_KEY'] = 'prøveeksamen'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mariadb+pymysql://brukernavn:passord@127.0.0.1/user_database'
+app.config['SECRET_KEY'] = 'passord'
 db = SQLAlchemy(app)
 Bcrypt = Bcrypt(app)
 
