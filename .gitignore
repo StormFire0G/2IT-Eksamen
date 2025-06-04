@@ -1,0 +1,19 @@
+#GJØR KUNN PÅ SERVER: flask shell
+
+from app import db, User
+User.__table__.drop(db.engine)
+db.create_all()
+
+#GJØRE BRUKER TIL ADMIN I FLASK SHELL
+from app import db, User
+user = User.query.filter_by(username='ditt_brukernavn').first()
+user.is_admin = True
+db.session.commit()
+
+#ADMIN PASSORD OG BRUKER
+admin
+admin123
+
+#TEST BRUKER
+storm
+12345678
