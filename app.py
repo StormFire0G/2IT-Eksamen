@@ -50,7 +50,7 @@ class AdminModelView(ModelView):
         # Sender deg til innloggingssiden hvis brukeren ikke har tilgang
         return redirect(url_for('login', next=request.url))
 
-#ADMIN
+# ADMIN
 admin = Admin(app, index_view=MyAdminIndexView())  # Bruker vår custom admin-hovedside
 admin.add_view(AdminModelView(User, db.session))   # Legger til bruker i admin-panel
 
