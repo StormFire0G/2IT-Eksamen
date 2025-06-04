@@ -17,3 +17,9 @@ admin123
 #TEST BRUKER
 storm
 12345678
+
+#GJØR PÅ SERVER FLASK SHELL:
+from app import db, Watch
+watches = Watch.query.all()
+print(watches)
+exit()

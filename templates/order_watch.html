@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+{% block head %}
+<title>Bestill klokke</title>
+{% endblock %}
+
+{% block body %}
+<h2>Bestill {{ watch.name }} ({{ watch.brand }})</h2>
+
+<p>Pris per stk: {{ "%.2f"|format(watch.price) }} kr</p>
+<p>Antall på lager: {{ watch.quantity }}</p>
+
+<form method="POST">
+    <label for="quantity">Antall:</label>
+    <input type="number" name="quantity" min="1" max="{{ watch.quantity }}" required>
+    <button type="submit">Bestill</button>
+</form>
+
+<a href="{{ url_for('dashboard') }}">Tilbake</a>
+{% endblock %}

@@ -1,11 +1,50 @@
-{% extends 'base.html' %}
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
 {% block head %}
 <title>Dashboard</title>
 {% endblock %}
 
-
 {% block body %}
 <h1>Hei {{ current_user.username }}, du er logget inn</h1>
+{% if current_user.is_admin %}
+    <a href="{{ url_for('view_orders') }}">Se bestillingslogg</a><br>
+{% endif %}
+<div class="watch_table"> 
+    <h2>Dine klokker</h2>
+
+    {% if watches %}
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Navn</th>
+                <th>Merke</th>
+                <th>Antall</th>
+                <th>Pris (kr)</th>
+                <th>Handling</th>  <!-- Ny kolonne for bestillingsknapp -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for watch in watches %}
+            <tr>
+                <td>{{ watch.name }}</td>
+                <td>{{ watch.brand }}</td>
+                <td>{{ watch.quantity }}</td>
+                <td>{{ "%.2f"|format(watch.price) }}</td>
+                <td><a href="{{ url_for('order_watch', watch_id=watch.id) }}">Bestill</a></td> <!-- Bestillingslenke -->
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p>Ingen klokker er registrert.</p>
+    {% endif %}
+</div>
+
 <a href="{{ url_for('logout') }}">Logg ut</a>
 {% endblock %}

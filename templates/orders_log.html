@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <title>Bestillingslogg</title>
+</head>
+<body>
+    <h1>Bestillingslogg</h1>
+    <pre>
+{% for entry in log_entries %}
+{{ entry }}
+{% endfor %}
+    </pre>
+    <a href="{{ url_for('dashboard') }}">Tilbake til dashboard</a>
+</body>
+</html>

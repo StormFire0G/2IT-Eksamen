@@ -7,6 +7,8 @@ from wtforms.validators import DataRequired, Length, ValidationError
 from flask_bcrypt import Bcrypt
 from flask_admin import Admin, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
+from datetime import datetime  # ➕ For å tidsstemple bestillinger
+import os  # ➕ For å håndtere loggfil
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mariadb+pymysql://brukernavn:passord@127.0.0.1/user_database'
@@ -26,6 +28,13 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(150), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)  # Er admin?
 
+class Watch(db.Model):
+    id = db.Column(db.Integer, primary_key=True)  # Unik ID for klokken
+    name = db.Column(db.String(150), nullable=False)  # Navn på klokken
+    brand = db.Column(db.String(150), nullable=False)  # Merke på klokken
+    quantity = db.Column(db.Integer, nullable=False)  # Antall som er igjen
+    price = db.Column(db.Float, nullable=False)  # Pris på klokken
+    
 # Hindrer at andre kan logge inn som admin
 @login.user_loader
 def load_user(user_id):
@@ -50,9 +59,10 @@ class AdminModelView(ModelView):
         # Sender deg til innloggingssiden hvis brukeren ikke har tilgang
         return redirect(url_for('login', next=request.url))
 
-# ADMIN
+#Admin panel
 admin = Admin(app, index_view=MyAdminIndexView())  # Bruker vår custom admin-hovedside
-admin.add_view(AdminModelView(User, db.session))   # Legger til bruker i admin-panel
+admin.add_view(AdminModelView(User, db.session))   # Legger til User i admin-panel
+admin.add_view(ModelView(Watch, db.session))  # Legger til Watch i admin-panel
 
 # Skjema for registrering
 class RegisterForm(FlaskForm):
@@ -93,10 +103,56 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-@app.route('/dashboard', methods=['GET', 'POST']) # Kommer til hovedskjerm, kun når man er logget inn
+@app.route('/dashboard', methods=['GET', 'POST'])  # Kommer til hovedskjerm, kun når man er logget inn
 @login_required
 def dashboard():
-    return render_template('dashboard.html')
+    watches = Watch.query.all()  # Henter alle klokker fra databasen
+    return render_template('dashboard.html', watches=watches)
+
+@app.route('/order/<int:watch_id>', methods=['GET', 'POST'])
+@login_required
+def order_watch(watch_id):
+    watch = Watch.query.get_or_404(watch_id)
+
+    if request.method == 'POST':
+        try:
+            quantity = int(request.form['quantity'])
+        except ValueError:
+            quantity = 0
+
+        if quantity <= 0:
+            return f"<p>Ugyldig antall valgt.</p><a href='{url_for('dashboard')}'>Tilbake</a>"
+
+        if quantity > watch.quantity:
+            return f"<p>Ikke nok klokker på lager. Kun {watch.quantity} igjen.</p><a href='{url_for('dashboard')}'>Tilbake</a>"
+
+        total_price = quantity * watch.price
+        watch.quantity -= quantity
+        db.session.commit()
+
+        # ➕ Logger bestillingen til fil
+        with open('orders.log', 'a', encoding='utf-8') as f:
+            f.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - Bruker: {current_user.username}, "
+                    f"Bestilte: {quantity} x {watch.name} ({watch.brand}), Totalt: {total_price:.2f} kr\n")
+
+        return f"<p>Du har bestilt {quantity} stk. {watch.name} for totalt {total_price:.2f} kr.</p><a href='{url_for('dashboard')}'>Tilbake til dashboard</a>"
+
+    return render_template('order_watch.html', watch=watch)
+
+# ➕ Viser bestillingsloggen – kun tilgjengelig for admin
+@app.route('/admin/orders')
+@login_required
+def view_orders():
+    if not current_user.is_admin:
+        return redirect(url_for('dashboard'))
+
+    if not os.path.exists('orders.log'):
+        log_entries = ["Ingen bestillinger registrert ennå."]
+    else:
+        with open('orders.log', 'r', encoding='utf-8') as f:
+            log_entries = f.readlines()
+
+    return render_template('orders_log.html', log_entries=log_entries)
 
 @app.route('/register', methods=['GET', 'POST']) # Registrerer ny bruker
 def register():
@@ -109,5 +165,6 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html', form=form)
 
+
 if __name__ == '__main__':
-   app.run(debug=True, host="0.0.0.0", port=5001)
+    app.run(debug=True, host="0.0.0.0", port=5000)
