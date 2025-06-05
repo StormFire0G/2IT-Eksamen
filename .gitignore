@@ -23,3 +23,9 @@ from app import db, Watch
 watches = Watch.query.all()
 print(watches)
 exit()
+
+Watch.__table__.drop(db.engine)
+
+#KLONE TIL SERVER
+rm __pycache__/app.cpython-312.pyc
+git pull origin main

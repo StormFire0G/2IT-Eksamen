@@ -2,49 +2,53 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 </head>
-{% block head %}
-<title>Dashboard</title>
-{% endblock %}
+<body>
 
-{% block body %}
-<h1>Hei {{ current_user.username }}, du er logget inn</h1>
+<h1>Hei {{ current_user.username|capitalize }}, se hva slags klokker du ønsker å kjøpe!</h1>
+
 {% if current_user.is_admin %}
     <a href="{{ url_for('view_orders') }}">Se bestillingslogg</a><br>
 {% endif %}
-<div class="watch_table"> 
-    <h2>Dine klokker</h2>
 
-    {% if watches %}
-    <table border="1">
-        <thead>
-            <tr>
-                <th>Navn</th>
-                <th>Merke</th>
-                <th>Antall</th>
-                <th>Pris (kr)</th>
-                <th>Handling</th>  <!-- Ny kolonne for bestillingsknapp -->
-            </tr>
-        </thead>
-        <tbody>
-            {% for watch in watches %}
-            <tr>
-                <td>{{ watch.name }}</td>
-                <td>{{ watch.brand }}</td>
-                <td>{{ watch.quantity }}</td>
-                <td>{{ "%.2f"|format(watch.price) }}</td>
-                <td><a href="{{ url_for('order_watch', watch_id=watch.id) }}">Bestill</a></td> <!-- Bestillingslenke -->
-            </tr>
+<div class="search-bar">
+    <form method="GET" action="{{ url_for('dashboard') }}">
+        <input type="text" name="search" placeholder="Søk etter klokke eller merke..." value="{{ request.args.get('search', '') }}">
+        <select name="brand">
+            <option value="">Alle merker</option>
+            {% for b in brands %}
+                <option value="{{ b }}" {% if request.args.get('brand') == b %}selected{% endif %}>{{ b }}</option>
             {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-        <p>Ingen klokker er registrert.</p>
+        </select>
+        <button type="submit">Søk</button>
+        <button type="button" onclick="window.location='{{ url_for('dashboard') }}'">Reset</button>
+    </form>
+</div>
+
+<div class="watch-grid">
+    {% for watch in watches %}
+        <div class="watch-card">
+            {% if watch.image_filename %}
+                <img src="{{ url_for('static', filename='images/watches/' + watch.image_filename) }}" alt="{{ watch.name }}">
+            {% else %}
+                <p><em>Ingen bilde tilgjengelig</em></p>
+            {% endif %}
+            <h3>{{ watch.name }}</h3>
+            <div class="info"><strong>Merke:</strong> {{ watch.brand }}</div>
+            <div class="info"><strong>Antall:</strong> {{ watch.quantity }}</div>
+            <div class="info"><strong>Pris:</strong> {{ "{:,.2f}".format(watch.price).replace(',', ' ') }} kr</div>
+            <a href="{{ url_for('order_watch', watch_id=watch.id) }}">Bestill</a>
+        </div>
+    {% endfor %}
+
+    {% if not watches %}
+        <p>Ingen klokker funnet.</p>
     {% endif %}
 </div>
 
 <a href="{{ url_for('logout') }}">Logg ut</a>
-{% endblock %}
+
+</body>
+</html>

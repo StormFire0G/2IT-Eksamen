@@ -7,8 +7,8 @@ from wtforms.validators import DataRequired, Length, ValidationError
 from flask_bcrypt import Bcrypt
 from flask_admin import Admin, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
-from datetime import datetime  # ➕ For å tidsstemple bestillinger
-import os  # ➕ For å håndtere loggfil
+from datetime import datetime  # For å tidsstemple bestillinger
+import os  # For å håndtere loggfil
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mariadb+pymysql://brukernavn:passord@127.0.0.1/user_database'
@@ -34,6 +34,7 @@ class Watch(db.Model):
     brand = db.Column(db.String(150), nullable=False)  # Merke på klokken
     quantity = db.Column(db.Integer, nullable=False)  # Antall som er igjen
     price = db.Column(db.Float, nullable=False)  # Pris på klokken
+    image_filename = db.Column(db.String(200))
     
 # Hindrer at andre kan logge inn som admin
 @login.user_loader
@@ -103,12 +104,28 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-@app.route('/dashboard', methods=['GET', 'POST'])  # Kommer til hovedskjerm, kun når man er logget inn
+@app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
 def dashboard():
-    watches = Watch.query.all()  # Henter alle klokker fra databasen
-    return render_template('dashboard.html', watches=watches)
+    query = Watch.query
+    # Henter søk og skjekker søk og merke
+    search = request.args.get('search')
+    brand = request.args.get('brand')
 
+    if search:
+        query = query.filter(
+            (Watch.name.ilike(f'%{search}%')) |
+            (Watch.brand.ilike(f'%{search}%'))
+        )
+    if brand:
+        query = query.filter_by(brand=brand)
+
+    watches = query.all()
+
+    all_brands = db.session.query(Watch.brand).distinct().all()
+    return render_template('dashboard.html', watches=watches, brands=[b[0] for b in all_brands])
+
+#Sender deg til at du har kjøpt klokken/ at den er bestilt
 @app.route('/order/<int:watch_id>', methods=['GET', 'POST'])
 @login_required
 def order_watch(watch_id):
@@ -121,21 +138,21 @@ def order_watch(watch_id):
             quantity = 0
 
         if quantity <= 0:
-            return f"<p>Ugyldig antall valgt.</p><a href='{url_for('dashboard')}'>Tilbake</a>"
+            return render_template('error.html', message="Ugyldig antall valgt.", back_url=url_for('dashboard'))
 
         if quantity > watch.quantity:
-            return f"<p>Ikke nok klokker på lager. Kun {watch.quantity} igjen.</p><a href='{url_for('dashboard')}'>Tilbake</a>"
+            return render_template('error.html', message=f"Ikke nok klokker på lager. Kun {watch.quantity} igjen.", back_url=url_for('dashboard'))
 
         total_price = quantity * watch.price
         watch.quantity -= quantity
         db.session.commit()
 
-        # ➕ Logger bestillingen til fil
+        # Logger bestillingen til fil
         with open('orders.log', 'a', encoding='utf-8') as f:
             f.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - Bruker: {current_user.username}, "
                     f"Bestilte: {quantity} x {watch.name} ({watch.brand}), Totalt: {total_price:.2f} kr\n")
 
-        return f"<p>Du har bestilt {quantity} stk. {watch.name} for totalt {total_price:.2f} kr.</p><a href='{url_for('dashboard')}'>Tilbake til dashboard</a>"
+        return render_template('success.html', message=f"Du har bestilt {quantity} stk. {watch.name} for totalt {total_price:.2f} kr.", back_url=url_for('dashboard'))
 
     return render_template('order_watch.html', watch=watch)
 
@@ -167,4 +184,4 @@ def register():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=True, host="0.0.0.0", port=5001)
