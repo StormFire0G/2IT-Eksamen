@@ -7,12 +7,12 @@
 </head>
 <body>
 
-<h1>Hei {{ current_user.username|capitalize }}, se hva slags klokker du ønsker å kjøpe!</h1>
+<h1>Velkommen til Watcher, {{ current_user.username|capitalize }}!</h1>
 
 {% if current_user.is_admin %}
     <a href="{{ url_for('view_orders') }}">Se bestillingslogg</a><br>
 {% endif %}
-
+<a href="{{ url_for('logout') }}">Logg ut</a>
 <div class="search-bar">
     <form method="GET" action="{{ url_for('dashboard') }}">
         <input type="text" name="search" placeholder="Søk etter klokke eller merke..." value="{{ request.args.get('search', '') }}">
@@ -37,7 +37,7 @@
             {% endif %}
             <h3>{{ watch.name }}</h3>
             <div class="info"><strong>Merke:</strong> {{ watch.brand }}</div>
-            <div class="info"><strong>Antall:</strong> {{ watch.quantity }}</div>
+            <div class="info"><strong>Antall på lager:</strong> {{ watch.quantity }}</div>
             <div class="info"><strong>Pris:</strong> {{ "{:,.2f}".format(watch.price).replace(',', ' ') }} kr</div>
             <a href="{{ url_for('order_watch', watch_id=watch.id) }}">Bestill</a>
         </div>
@@ -48,7 +48,7 @@
     {% endif %}
 </div>
 
-<a href="{{ url_for('logout') }}">Logg ut</a>
+
 
 </body>
 </html>

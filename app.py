@@ -156,7 +156,7 @@ def order_watch(watch_id):
 
     return render_template('order_watch.html', watch=watch)
 
-# ➕ Viser bestillingsloggen – kun tilgjengelig for admin
+# Viser bestillingsloggen – kun tilgjengelig for admin
 @app.route('/admin/orders')
 @login_required
 def view_orders():
@@ -184,4 +184,4 @@ def register():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=True, host="0.0.0.0", port=5001)
