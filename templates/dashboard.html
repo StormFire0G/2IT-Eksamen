@@ -13,11 +13,13 @@
     <a href="{{ url_for('view_orders') }}">Se bestillingslogg</a><br>
 {% endif %}
 <a href="{{ url_for('logout') }}">Logg ut</a>
+
 <div class="search-bar">
-    <form method="GET" action="{{ url_for('dashboard') }}">
+    <form method="GET" action="{{ url_for('dashboard') }}" id="search-form">
         <input type="text" name="search" placeholder="Søk etter klokke eller merke..." value="{{ request.args.get('search', '') }}">
-        <select name="brand">
-            <option value="">Alle merker</option>
+        <!-- Når brukeren velger et klokkemerke, vil skjemaet automatisk bli sendt -->
+        <select name="brand" onchange="document.getElementById('search-form').submit();">
+            <option value="">Velg klokke merket</option>
             {% for b in brands %}
                 <option value="{{ b }}" {% if request.args.get('brand') == b %}selected{% endif %}>{{ b }}</option>
             {% endfor %}
