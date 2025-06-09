@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <title>Mine Bestillinger</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+<body>
+
+<h1>Mine Bestillinger</h1>
+<a href="{{ url_for('dashboard') }}">Tilbake til dashboard</a> |
+<a href="{{ url_for('logout') }}">Logg ut</a>
+
+{% if orders %}
+    <table border="1" cellpadding="10" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Dato</th>
+                <th>Klokke</th>
+                <th>Merke</th>
+                <th>Antall</th>
+                <th>Pris per stk</th>
+                <th>Totalpris</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+                <tr>
+                    <td>{{ order.timestamp.strftime('%d.%m.%Y %H:%M') }}</td>
+                    <td>{{ order.watch.name }}</td>
+                    <td>{{ order.watch.brand }}</td>
+                    <td>{{ order.quantity }}</td>
+                    <td>{{ "{:,.2f}".format(order.watch.price).replace(',', ' ') }} kr</td>
+                    <td>{{ "{:,.2f}".format(order.total_price).replace(',', ' ') }} kr</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>Du har ikke lagt inn noen bestillinger enda.</p>
+{% endif %}
+
+</body>
+</html>

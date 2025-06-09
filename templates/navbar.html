@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navbar</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <!-- Logo -->
+        <div class="logo">
+            <a href="{{ url_for('dashboard') }}">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
+            </a>
+        </div>
+        <!-- Links -->
+        <div class="velkommen"><h1>Velkommen til Watcher, {{ current_user.username|capitalize }}!</h1></div>
+        <ul class="nav-links">
+            {% if current_user.is_authenticated %}
+                <li><a href="{{ url_for('my_orders') }}">Mine bestillinger</a></li>
+                <li><a href="{{ url_for('logout') }}">Logg ut</a></li>
+            {% else %}
+                <li><a href="{{ url_for('login') }}">Logg inn</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</body>
+</html>

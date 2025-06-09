@@ -1,6 +1,6 @@
 #GJØR KUNN PÅ SERVER: flask shell
 
-from app import db, User
+from app import db, User, 
 User.__table__.drop(db.engine)
 db.create_all()
 

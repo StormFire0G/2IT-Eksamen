@@ -4,15 +4,17 @@
     <meta charset="UTF-8">
     <title>Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
 </head>
 <body>
 
-<h1>Velkommen til Watcher, {{ current_user.username|capitalize }}!</h1>
+<!-- Inkluderer navbar -->
+{% include 'navbar.html' %}
+
 
 {% if current_user.is_admin %}
     <a href="{{ url_for('view_orders') }}">Se bestillingslogg</a><br>
 {% endif %}
-<a href="{{ url_for('logout') }}">Logg ut</a>
 
 <div class="search-bar">
     <form method="GET" action="{{ url_for('dashboard') }}" id="search-form">
@@ -49,8 +51,6 @@
         <p>Ingen klokker funnet.</p>
     {% endif %}
 </div>
-
-
 
 </body>
 </html>
