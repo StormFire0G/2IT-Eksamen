@@ -48,6 +48,16 @@ class Order(db.Model):
     user = db.relationship('User', backref='orders')
     watch = db.relationship('Watch', backref='orders')
 
+#Handlekurv
+class CartItem(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    watch_id = db.Column(db.Integer, db.ForeignKey('watch.id'), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+
+    user = db.relationship('User', backref='cart_items')
+    watch = db.relationship('Watch')
+    
 # Hindrer at andre kan logge inn som admin
 @login.user_loader
 def load_user(user_id):

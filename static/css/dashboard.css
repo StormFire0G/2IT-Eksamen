@@ -95,3 +95,29 @@
   .search-bar button:hover {
     background-color: #1e7e34;
   }
+
+  .button-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.button-group form button,
+.button-group a {
+    background-color: #007bff;
+    color: white;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.button-group form button:hover,
+.button-group a:hover {
+    background-color: #0056b3;
+}

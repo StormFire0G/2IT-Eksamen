@@ -1,0 +1,222 @@
+@app.route('/add_to_cart/<int:watch_id>', methods=['POST'])
+@login_required
+def add_to_cart(watch_id):
+    watch = Watch.query.get_or_404(watch_id)
+    try:
+        quantity = int(request.form['quantity'])
+    except ValueError:
+        quantity = 1
+
+    if quantity < 1:
+        quantity = 1
+
+    cart_item = CartItem.query.filter_by(user_id=current_user.id, watch_id=watch.id).first()
+    if cart_item:
+        cart_item.quantity += quantity
+    else:
+        cart_item = CartItem(user_id=current_user.id, watch_id=watch.id, quantity=quantity)
+        db.session.add(cart_item)
+
+    db.session.commit()
+    return redirect(url_for('dashboard'))
+
+@app.route('/cart')
+@login_required
+def view_cart():
+    cart_items = CartItem.query.filter_by(user_id=current_user.id).all()
+    total = sum(item.quantity * item.watch.price for item in cart_items)
+    return render_template('cart.html', cart_items=cart_items, total=total)
+
+@app.route('/remove_from_cart/<int:item_id>', methods=['POST'])
+@login_required
+def remove_from_cart(item_id):
+    item = CartItem.query.get_or_404(item_id)
+    if item.user_id != current_user.id:
+        abort(403)  # Forhindre at andre fjerner andres varer
+    db.session.delete(item)
+    db.session.commit()
+    return redirect(url_for('view_cart'))
+
+@app.route('/checkout', methods=['POST'])
+@login_required
+def checkout():
+    cart_items = CartItem.query.filter_by(user_id=current_user.id).all()
+    if not cart_items:
+        flash("Handlekurven er tom", "warning")
+        return redirect(url_for('view_cart'))
+
+    for item in cart_items:
+        if item.quantity > item.watch.quantity:
+            flash(f"Ikke nok på lager for {item.watch.name}", "danger")
+            return redirect(url_for('view_cart'))
+
+    for item in cart_items:
+        total_price = item.quantity * item.watch.price
+        order = Order(user_id=current_user.id, watch_id=item.watch_id, quantity=item.quantity, total_price=total_price)
+        item.watch.quantity -= item.quantity
+        db.session.add(order)
+        db.session.delete(item)
+
+    db.session.commit()
+    return render_template('success.html', message="Bestillingen er gjennomført!", back_url=url_for('dashboard'))
+
+@app.route('/order-cart', methods=['GET', 'POST'])
+@login_required
+def order_cart():
+    cart = session.get('cart', {})
+
+    if not cart:
+        flash('Handlekurven din er tom.')
+        return redirect(url_for('view_cart'))
+
+    watches = Watch.query.filter(Watch.id.in_(cart.keys())).all()
+    cart_items = []
+    total_sum = 0
+
+    for watch in watches:
+        quantity = cart[str(watch.id)]
+        total_price = watch.price * quantity
+        total_sum += total_price
+        cart_items.append({
+            'watch': watch,
+            'quantity': quantity,
+            'total_price': total_price
+        })
+
+    # POST: bruker har bekreftet og sendt inn bestillingen
+    if request.method == 'POST':
+        for item in cart_items:
+            if item['watch'].quantity < item['quantity']:
+                flash(f"Ikke nok på lager for {item['watch'].name}")
+                return redirect(url_for('order_cart'))
+
+        for item in cart_items:
+            item['watch'].quantity -= item['quantity']
+            db.session.add(Order(
+                user_id=current_user.id,
+                watch_id=item['watch'].id,
+                quantity=item['quantity'],
+                total_price=item['total_price']
+            ))
+        db.session.commit()
+        session['cart'] = {}
+        return render_template("success.html", message="Alle produkter er bestilt!", back_url=url_for('dashboard'))
+
+    # GET: vis innholdet i handlekurven før bestilling
+    return render_template("order_cart.html", cart_items=cart_items, total_sum=total_sum)
+
+
+
+
+
+
+
+
+
+
+
+
+CART.html
+
+
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <title>Handlekurv</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+<body>
+<h1>Din Handlekurv</h1>
+<a href="{{ url_for('dashboard') }}">Tilbake til dashboard</a>
+
+<form method="POST" action="{{ url_for('order_cart') }}">
+    <button type="submit">Bestill alt</button>
+</form>
+
+{% if cart %}
+    <a href="{{ url_for('order_cart') }}">
+        <button type="button">Bestill alt</button>
+    </a>
+{% endif %}
+
+{% if cart_items %}
+    <table border="1" cellpadding="10">
+        <tr>
+            <th>Klokke</th>
+            <th>Merke</th>
+            <th>Antall</th>
+            <th>Pris</th>
+            <th>Sum</th>
+            <th>Fjern</th>
+        </tr>
+        {% for item in cart_items %}
+        <tr>
+            <td>{{ item.watch.name }}</td>
+            <td>{{ item.watch.brand }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ "%.2f"|format(item.watch.price) }} kr</td>
+            <td>{{ "%.2f"|format(item.quantity * item.watch.price) }} kr</td>
+            <td>
+                <form method="POST" action="{{ url_for('remove_from_cart', item_id=item.id) }}">
+                    <button type="submit">Fjern</button>
+                </form>
+            </td>      
+        </tr>
+    
+        {% endfor %}
+    </table>
+
+    <p><strong>Total:</strong> {{ "%.2f"|format(total) }} kr</p>
+{% else %}
+    <p>Handlekurven din er tom.</p>
+{% endif %}
+</body>
+</html>
+
+
+
+order_cart:
+
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <title>Bekreft Handlekurv</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/order_watch.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Bekreft bestilling av handlekurv</h2>
+        <table border="1" cellpadding="10" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Klokke</th>
+                    <th>Merke</th>
+                    <th>Pris per stk</th>
+                    <th>Antall</th>
+                    <th>Totalpris</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}
+                    <tr>
+                        <td>{{ item.watch.name }}</td>
+                        <td>{{ item.watch.brand }}</td>
+                        <td>{{ "{:,.2f}".format(item.watch.price).replace(',', ' ') }} kr</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ "{:,.2f}".format(item.total_price).replace(',', ' ') }} kr</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h3>Totalt: {{ "{:,.2f}".format(total_sum).replace(',', ' ') }} kr</h3>
+
+        <form method="POST">
+            <button type="submit">Bekreft bestilling</button>
+        </form>
+        <a href="{{ url_for('view_cart') }}">Tilbake til handlekurv</a>
+    </div>
+</body>
+</html>
