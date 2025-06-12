@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Navbar</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <nav class="navbar">
@@ -18,10 +19,11 @@
         <div class="velkommen"><h1>Velkommen til Watcher, {{ current_user.username|capitalize }}!</h1></div>
         <ul class="nav-links">
             {% if current_user.is_authenticated %}
-                <li><a href="{{ url_for('my_orders') }}">Mine bestillinger</a></li>
-                <li><a href="{{ url_for('logout') }}">Logg ut</a></li>
+                <li><a href="{{ url_for('cart') }}"><i class="fas fa-shopping-cart"></i> Handlekurv</a></li>
+                <li><a href="{{ url_for('my_orders') }}"><i class="fas fa-box"></i> Mine bestillinger</a></li>
+                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logg ut</a></li>
             {% else %}
-                <li><a href="{{ url_for('login') }}">Logg inn</a></li>
+                <li><a href="{{ url_for('login') }}"><i class="fas fa-sign-in-alt"></i></i></i>Logg inn</a></li>
             {% endif %}
         </ul>
     </nav>

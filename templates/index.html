@@ -4,6 +4,9 @@
 <title>Task Master</title>
 {% endblock %}
 
+<!-- Inkluderer navbar -->
+{% include 'navbar.html' %}
+
 {% block body %}
 <h1>Det ser ut som du ikke er logget inn</h1>
 <a href="{{ url_for('login') }}">Log in</a>

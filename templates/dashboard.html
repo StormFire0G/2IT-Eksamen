@@ -33,18 +33,24 @@
 
 <div class="watch-grid">
     {% for watch in watches %}
-        <div class="watch-card">
-            {% if watch.image_filename %}
-                <img src="{{ url_for('static', filename='images/watches/' + watch.image_filename) }}" alt="{{ watch.name }}">
-            {% else %}
-                <p><em>Ingen bilde tilgjengelig</em></p>
-            {% endif %}
-            <h3>{{ watch.name }}</h3>
-            <div class="info"><strong>Merke:</strong> {{ watch.brand }}</div>
-            <div class="info"><strong>Antall på lager:</strong> {{ watch.quantity }}</div>
-            <div class="info"><strong>Pris:</strong> {{ "{:,.2f}".format(watch.price).replace(',', ' ') }} kr</div>
+    <div class="watch-card">
+        {% if watch.image_filename %}
+            <img src="{{ url_for('static', filename='images/watches/' + watch.image_filename) }}" alt="{{ watch.name }}">
+        {% else %}
+            <p><em>Ingen bilde tilgjengelig</em></p>
+        {% endif %}
+        <h3>{{ watch.name }}</h3>
+        <div class="info"><strong>Merke:</strong> {{ watch.brand }}</div>
+        <div class="info"><strong>Antall på lager:</strong> {{ watch.quantity }}</div>
+        <div class="info"><strong>Pris:</strong> {{ "{:,.2f}".format(watch.price).replace(',', ' ') }} kr</div>
+    
+        <div class="button-group">
+            <form method="POST" action="{{ url_for('add_to_cart', watch_id=watch.id) }}" class="cart-form">
+                 <button type="submit" type="number" name="quantity" min="1" max="{{ watch.quantity }}" value="1" required>Legg i handlekurv</button>
+            </form>
             <a href="{{ url_for('order_watch', watch_id=watch.id) }}">Bestill</a>
         </div>
+    </div>
     {% endfor %}
 
     {% if not watches %}
@@ -52,5 +58,6 @@
     {% endif %}
 </div>
 
+{% include 'footer.html' %}
 </body>
 </html>

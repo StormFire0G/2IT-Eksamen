@@ -19,7 +19,7 @@ Bcrypt = Bcrypt(app)
 # Gjør at flask og log inn kan sammarbeide
 login = LoginManager()
 login.init_app(app)
-login.login_view = 'login'
+login.login_view = 'login'  # Hvis @login_required brukes og man ikke er innlogget, sendes man hit
 
 # Modell for bruker
 class User(db.Model, UserMixin):
@@ -33,35 +33,36 @@ class Watch(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False)
     brand = db.Column(db.String(150), nullable=False)
-    quantity = db.Column(db.Integer, nullable=False)
-    price = db.Column(db.Float, nullable=False)
-    image_filename = db.Column(db.String(200))
+    quantity = db.Column(db.Integer, nullable=False)  # Hvor mange på lager
+    price = db.Column(db.Float, nullable=False)  # Pris i kr
+    image_filename = db.Column(db.String(200))  # Filnavn for bilde av klokken
 
 # Ny modell for bestillinger
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    watch_id = db.Column(db.Integer, db.ForeignKey('watch.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # Kobler til bruker-tabellen
+    watch_id = db.Column(db.Integer, db.ForeignKey('watch.id'), nullable=False)  # Kobler til klokke-tabellen
     quantity = db.Column(db.Integer, nullable=False)
     total_price = db.Column(db.Float, nullable=False)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    user = db.relationship('User', backref='orders')
-    watch = db.relationship('Watch', backref='orders')
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)  # Automatisk tidspunkt
 
-#Handlekurv
+    user = db.relationship('User', backref='orders')  # Gjør det mulig å skrive order.user
+    watch = db.relationship('Watch', backref='orders')  # Gjør det mulig å skrive order.watch
+
+# Handlekurv-tabell
 class CartItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     watch_id = db.Column(db.Integer, db.ForeignKey('watch.id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
 
-    user = db.relationship('User', backref='cart_items')
-    watch = db.relationship('Watch')
-    
+    user = db.relationship('User', backref='cart_items')  # Tilgang til brukers handlekurv
+    watch = db.relationship('Watch')  # Tilgang til klokke-objekt
+
 # Hindrer at andre kan logge inn som admin
 @login.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return User.query.get(int(user_id))  # Henter brukerobjekt fra ID
 
 # Custom admin-hovedside (hindrer tilgang til /admin for ikke-admins)
 class MyAdminIndexView(AdminIndexView):
@@ -78,8 +79,8 @@ class AdminModelView(ModelView):
 
     def inaccessible_callback(self, name, **kwargs):
         return redirect(url_for('login', next=request.url))
-    
-#Kan se hvem og som har bestil hva, og kan fjerne det i admin panel
+
+# Kan se hvem og som har bestil hva, og kan fjerne det i admin panel
 class OrderAdminView(AdminModelView):
     column_list = ['id', 'user_info', 'watch.name', 'quantity', 'total_price', 'timestamp']
     column_labels = {
@@ -91,16 +92,18 @@ class OrderAdminView(AdminModelView):
     }
 
     def _user_info_formatter(self, context, model, name):
-        return f"{model.user_id} / {model.user.username}"
+        return f"{model.user_id} / {model.user.username}"  # Viser ID og brukernavn samtidig
 
     column_formatters = {
         'user_info': _user_info_formatter
     }
 
+# Legger til modellene i admin-panelet
 admin = Admin(app, index_view=MyAdminIndexView())
 admin.add_view(AdminModelView(User, db.session))
 admin.add_view(ModelView(Watch, db.session))
-admin.add_view(OrderAdminView(Order, db.session))  # Legger til Order i admin-panel
+admin.add_view(OrderAdminView(Order, db.session))
+admin.add_view(AdminModelView(CartItem, db.session))
 
 # Skjema for registrering
 class RegisterForm(FlaskForm):
@@ -121,7 +124,7 @@ class LoginForm(FlaskForm):
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return redirect(url_for('register'))  # Sender brukeren rett til registrering
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -129,8 +132,8 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user and Bcrypt.check_password_hash(user.password, form.password.data):
-            login_user(user)
-            next_page = request.args.get('next')
+            login_user(user)  # Logger inn brukeren og lagrer det i session
+            next_page = request.args.get('next')  # Hvis bruker ble sendt hit pga @login_required, send tilbake
             return redirect(next_page) if next_page else redirect(url_for('dashboard'))
 
     return render_template('login.html', form=form)
@@ -138,15 +141,15 @@ def login():
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
-    logout_user()
+    logout_user()  # Logger ut og fjerner session-data
     return redirect(url_for('login'))
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
 def dashboard():
     query = Watch.query
-    search = request.args.get('search')
-    brand = request.args.get('brand')
+    search = request.args.get('search')  # Søkeord fra bruker
+    brand = request.args.get('brand')  # Filter på merke
 
     if search:
         query = query.filter(
@@ -157,10 +160,10 @@ def dashboard():
         query = query.filter_by(brand=brand)
 
     watches = query.all()
-    all_brands = db.session.query(Watch.brand).distinct().all()
+    all_brands = db.session.query(Watch.brand).distinct().all()  # Henter unike merker for dropdown
     return render_template('dashboard.html', watches=watches, brands=[b[0] for b in all_brands])
 
-#Se hva current_user har bestilt
+# Se hva current_user har bestilt
 @app.route('/my_orders')
 @login_required
 def my_orders():
@@ -215,12 +218,75 @@ def view_orders():
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
-        hashed_password = Bcrypt.generate_password_hash(form.password.data)
+        hashed_password = Bcrypt.generate_password_hash(form.password.data)  # Krypterer passordet
         new_user = User(username=form.username.data, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
         return redirect(url_for('login'))
     return render_template('register.html', form=form)
 
+@app.route('/add_to_cart/<int:watch_id>', methods=['POST'])
+@login_required
+def add_to_cart(watch_id):
+    watch = Watch.query.get_or_404(watch_id)
+    quantity = int(request.form['quantity'])
+
+    if quantity <= 0 or quantity > watch.quantity:
+        return render_template('error.html', message="Ugyldig antall valgt.", back_url=url_for('dashboard'))
+
+    # Sjekk om varen allerede finnes i handlekurv
+    existing_item = CartItem.query.filter_by(user_id=current_user.id, watch_id=watch_id).first()
+    if existing_item:
+        existing_item.quantity += quantity
+    else:
+        new_item = CartItem(user_id=current_user.id, watch_id=watch_id, quantity=quantity)
+        db.session.add(new_item)
+
+    db.session.commit()
+    return redirect(url_for('dashboard'))
+
+@app.route('/cart')
+@login_required
+def cart():
+    cart_items = CartItem.query.filter_by(user_id=current_user.id).all()
+    total = sum(item.quantity * item.watch.price for item in cart_items)  # Summerer total pris
+    return render_template('cart.html', cart_items=cart_items, total=total)
+
+@app.route('/remove_from_cart/<int:item_id>', methods=['POST'])
+@login_required
+def remove_from_cart(item_id):
+    item = CartItem.query.get_or_404(item_id)
+    if item.user_id != current_user.id:
+        return redirect(url_for('cart'))  # Bruker kan bare fjerne egne varer
+    db.session.delete(item)
+    db.session.commit()
+    return redirect(url_for('cart'))
+
+@app.route('/checkout', methods=['POST'])
+@login_required
+def checkout():
+    cart_items = CartItem.query.filter_by(user_id=current_user.id).all()
+    if not cart_items:
+        return render_template('error.html', message="Handlekurven din er tom.", back_url=url_for('dashboard'))
+
+    # Først sjekker vi at alt i handlekurven er mulig å kjøpe
+    for item in cart_items:
+        if item.quantity > item.watch.quantity:
+            return render_template('error.html', message=f"Ikke nok på lager for {item.watch.name}.", back_url=url_for('cart'))
+
+    total_sum = 0
+    for item in cart_items:
+        item.watch.quantity -= item.quantity
+        total_price = item.quantity * item.watch.price
+        total_sum += total_price
+        new_order = Order(user_id=current_user.id, watch_id=item.watch.id, quantity=item.quantity, total_price=total_price)
+        db.session.add(new_order)
+        db.session.delete(item)  # Fjerner fra handlekurven
+
+    db.session.commit()
+
+    message = f"Du har bestilt varer for totalt {total_sum:.2f} kr."
+    return render_template('success.html', message=message, back_url=url_for('dashboard'))
+
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", port=5001)
+    app.run(debug=True, host="0.0.0.0", port=5001)  # Kjøres på alle IP-er, port 5001

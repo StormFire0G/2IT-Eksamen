@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <title>Handlekurv</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cart.css') }}">
+</head>
+<!-- Inkluderer navbar -->
+{% include 'navbar.html' %}
+
+<body class="bg-light">
+    <div class="container mt-5">
+        <h2 class="mb-4">Din Handlekurv</h2>
+
+        {% if cart_items %}
+            <table class="table table-bordered bg-white shadow-sm">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Produkt</th>
+                        <th>Antall</th>
+                        <th>Pris per stk</th>
+                        <th>Totalt</th>
+                        <th>Fjern</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart_items %}
+                    <tr>
+                        <td>{{ item.watch.name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.watch.price }} kr</td>
+                        <td>{{ item.quantity * item.watch.price }} kr</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('remove_from_cart', item_id=item.id) }}">
+                                <button class="btn btn-sm btn-danger">Fjern</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="text-end"><strong>Total</strong></td>
+                        <td colspan="2"><strong>{{ total }} kr</strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <div class="text-end">
+                <form method="POST" action="{{ url_for('checkout') }}">
+                    <button type="submit" class="btn btn-success">Fullfør bestilling</button>
+                </form>
+            </div>
+            <a href="{{ url_for('dashboard') }}">Gå tilbake til butikken</a>
+        {% else %}
+            <div class="alert alert-info">
+                Handlekurven din er tom. <a href="{{ url_for('dashboard') }}">Gå tilbake til butikken</a>.
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

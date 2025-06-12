@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <title>Mine Bestillinger</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/my_orders.css') }}">
 </head>
 <body>
 
-<h1>Mine Bestillinger</h1>
-<a href="{{ url_for('dashboard') }}">Tilbake til dashboard</a> |
-<a href="{{ url_for('logout') }}">Logg ut</a>
+<!-- Inkluderer navbar -->
+{% include 'navbar.html' %}
 
+<h1>Mine Bestillinger</h1>
 {% if orders %}
     <table border="1" cellpadding="10" cellspacing="0">
         <thead>
@@ -39,6 +39,6 @@
 {% else %}
     <p>Du har ikke lagt inn noen bestillinger enda.</p>
 {% endif %}
-
+<a href="{{ url_for('dashboard') }}">Tilbake til dashboard</a>
 </body>
 </html>
