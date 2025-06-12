@@ -8,7 +8,7 @@ Dette prosjektet er en fiktiv nettbutikk bygget med Flask, Jinja2 og MariaDB som
 ## Trello
 
 Du kan følge prosjektets planer og oppgaver på Trello: [2IT-Eksamen](https://trello.com/b/SAroMKd1/2it-eksamen)
-# Innhold
+## Innhold
 
 - `app.py` Hoved koden som utfører flask 
 - `templates/` HTML maler som man bruker i stedet for å lage index.html i python/flask
