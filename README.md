@@ -1,20 +1,20 @@
 
 # 2IT-Eksamen – Nettbutikk for klokker
 
-Dette prosjektet er en nettbutikk for klokker bygget med Flask og MariaDB som database. Det er et fullstack webprosjekt med innlogging, adminpanel, handlekurv, sikkerhet, og bestillingssystem.
+Dette prosjektet er en fiktiv nettbutikk bygget med Flask, Jinja2 og MariaDB som database. Det er et fullstack webprosjekt med innlogging, adminpanel, handlekurv, sikkerhet, og fiktiv bestillingssystem.
 
 ---
-
-# Trello
+# Prosjektets innhold
+## Trello
 
 Du kan følge prosjektets planer og oppgaver på Trello: [2IT-Eksamen](https://trello.com/b/SAroMKd1/2it-eksamen)
-## Innhold
+# Innhold
 
-- `app.py` – Flask-applikasjonen med backend-logikk og databaser.
-- `templates/` – HTML-malene for nettsiden.
-- `static/` – CSS og bilder.
-- `orders.log` – Loggfil for bestillinger (valgfritt).
-- `env/` – Virtuelt Python-miljø (ikke inkludert i Git).
+- `app.py` Hoved koden som utfører flask 
+- `templates/` HTML maler som man bruker i stedet for å lage index.html i python/flask
+- `static/` CSS og bilder.
+- `orders.log` Log for å skjekke om alt funker
+- `env/` Virtuelt Python-miljø som er isolert og ikke påvirker selve maskinen din
 
 ---
 ### Kjøre programmet
