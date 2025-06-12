@@ -17,15 +17,18 @@ Du kan følge prosjektets planer og oppgaver på Trello: [2IT-Eksamen](https://t
 - `env/` Virtuelt Python-miljø som er isolert og ikke påvirker selve maskinen din
 
 ---
-### Kjøre programmet
-
-### 1. Installer MariaDB
-
-
+# Hvordan starte prosjektet?
+### Last ned homebrew aller først!
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+### 1.1 Last ned MariaDB
 - Last ned og installer MariaDB fra: https://mariadb.org/download/
-- Start MariaDB-serveren og opprett en database (f.eks. `user_database`).
-
-### 2. Opprett og aktiver virtuelt miljø (virtualenv)
+- ELLER
+- ```bash
+brew install mariadb
+```
+### 1.2 Kjør MariaDB
 
 Virtuelt miljø brukes for å isolere prosjektets Python-pakker slik at de ikke konflikter med andre prosjekter eller systempakker.
 
