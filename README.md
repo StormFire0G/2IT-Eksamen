@@ -42,8 +42,6 @@ brew services start mariadb
 ```bash
 mariadb -u root
 ```
-
-# DEL 2: Oppretting av bruker
 ## Lage bruker (bytt 'brukernavn' og 'passord' med noe enkelt)
 ```bash
 CREATE USER "brukernavn"@"localhost" IDENTIFIED BY "passord";
