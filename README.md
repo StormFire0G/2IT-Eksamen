@@ -25,6 +25,36 @@ Du kan følge prosjektets planer og oppgaver på Trello: [2IT-Eksamen](https://t
 ### 1.1 Last ned MariaDB
 - Last ned og installer MariaDB fra: https://mariadb.org/download/ eller last ned med brew
 ```bash
+
 brew install mariadb
 ```
+## Start MariaDB som en tjeneste
+```bash
+mysql.server start
+```
 
+## Start MariaDB som en tjeneste
+```bash
+brew services start mariadb
+```
+
+## Start "appen" (bytt root med brukernavn etter vi lager det)
+```bash
+mariadb -u root
+```
+
+# DEL 2: Oppretting av bruker
+## Lage bruker (bytt 'brukernavn' og 'passord' med noe enkelt)
+```bash
+CREATE USER "brukernavn"@"localhost" IDENTIFIED BY "passord";
+```
+
+## Gi bruker tilgang til database
+```bash
+GRANT ALL PRIVILEGES ON *.* TO "brukernavn"@"localhost";
+```
+
+## Lagre endringer
+```bash
+FLUSH PRIVILEGES;
+```
