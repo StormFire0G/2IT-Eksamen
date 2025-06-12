@@ -23,9 +23,8 @@ Du kan følge prosjektets planer og oppgaver på Trello: [2IT-Eksamen](https://t
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 ### 1.1 Last ned MariaDB
-- Last ned og installer MariaDB fra: https://mariadb.org/download/
-- ELLER
-- ```bash
+- Last ned og installer MariaDB fra: https://mariadb.org/download/ eller last ned med brew
+-```bash
 brew install mariadb
 ```
 ### 1.2 Kjør MariaDB
