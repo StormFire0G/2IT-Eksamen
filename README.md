@@ -59,25 +59,25 @@ FLUSH PRIVILEGES;
 ```
 ## Lage virituelt miljø for å gjøre prosjektet sine pakker sikkre, og beskytte maskinen hvis feil dukker opp
 
-### Laste ned med pip
+### 1 Laste ned med pip
 ```bash 
 pip3 / pip install virtualenv
 ```
 
-### Lage et virituelt miljø på prosjektet
+### 2 Lage et virituelt miljø på prosjektet
 ```bash
 virtualenv env
 ```
-### Aktivere miljøet
+### 3 Aktivere miljøet
 ```bash
 source env/bin/activate
 ```
 
-### Installer nødvendige pakker til prosjektet
+### 4 Installer nødvendige pakker til prosjektet
 ```bash
 pip install Flask Flask_SQLAlchemy Flask_Login Flask_WTF WTForms Flask_Bcrypt Flask_Admin pymysql
 ```
-### Importere database moddelene i MariaDB
+### 5 Importere database moddelene i MariaDB
 ```bash
 flask shell
 >>> from app import db
@@ -85,7 +85,7 @@ flask shell
 >>> exit()
 ```
 
-### Kjøre programmet 
+### 6 Kjøre programmet 
 ```bash
 python3 app.py
 ```
