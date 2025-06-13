@@ -22,37 +22,41 @@ Du kan følge prosjektets planer og oppgaver på Trello: [2IT-Eksamen](https://t
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
-### 1.1 Last ned MariaDB
+### 2 Last ned MariaDB
 - Last ned og installer MariaDB fra: https://mariadb.org/download/ eller last ned med brew
 ```bash
 
 brew install mariadb
 ```
-## Start MariaDB som en tjeneste
+## 3 Start MariaDB som en tjeneste
 ```bash
 mysql.server start
 ```
 
-## Start MariaDB som en tjeneste
+## 4 Start MariaDB som en tjeneste
 ```bash
 brew services start mariadb
 ```
 
-## Start "appen" (bytt root med brukernavn etter vi lager det)
+## 5 Start "appen" (bytt root med brukernavn etter vi lager det)
 ```bash
 mariadb -u root
 ```
-## Lage bruker (bytt 'brukernavn' og 'passord' med noe enkelt)
+## 6 Lage bruker (bytt 'brukernavn' og 'passord' med noe enkelt)
 ```bash
 CREATE USER "brukernavn"@"localhost" IDENTIFIED BY "passord";
 ```
 
-## Gi bruker tilgang til database
+## 7 Gi bruker tilgang til database
 ```bash
 GRANT ALL PRIVILEGES ON *.* TO "brukernavn"@"localhost";
 ```
 
-## Lagre endringer
+## 8 Lagre endringer
 ```bash
 FLUSH PRIVILEGES;
+```
+## Når du har lastet ned MariaDB, går du inn på prosjektmappen og laster ned et virituelt minljø for mappen i terminal
+```bash 
+pip3 / pip install virtualenv
 ```
